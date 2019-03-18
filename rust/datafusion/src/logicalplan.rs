@@ -364,6 +364,13 @@ pub enum LogicalPlan {
         input: Arc<LogicalPlan>,
         schema: Arc<Schema>,
     },
+
+    // Represents a list of order expressions to be applied to a relation
+    Order {
+        expr: Vec<Expr>,
+        input: Arc<LogicalPlan>,
+        schema: Arc<Schema>,
+    },
 }
 
 impl LogicalPlan {
@@ -377,6 +384,7 @@ impl LogicalPlan {
             LogicalPlan::Aggregate { schema, .. } => &schema,
             LogicalPlan::Sort { schema, .. } => &schema,
             LogicalPlan::Limit { schema, .. } => &schema,
+            LogicalPlan::Order { schema, .. } => &schema,
         }
     }
 }
@@ -451,6 +459,14 @@ impl LogicalPlan {
                 ..
             } => {
                 write!(f, "Limit: {:?}", expr)?;
+                input.fmt_with_indent(f, indent + 1)
+            }
+            LogicalPlan::Order {
+                ref input,
+                ref expr,
+                ..
+            } => {
+                write!(f, "Order: {:?}", expr)?;
                 input.fmt_with_indent(f, indent + 1)
             }
         }
